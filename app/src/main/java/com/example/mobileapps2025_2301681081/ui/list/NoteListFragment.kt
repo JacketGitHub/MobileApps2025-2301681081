@@ -64,7 +64,7 @@ class NoteListFragment : Fragment() {
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val note = adapter.currentList[viewHolder.bindingAdapterPosition]
+                val note = adapter.currentList[viewHolder.adapterPosition]
                 viewModel.deleteNote(note)
                 Snackbar.make(binding.root, "Note deleted", Snackbar.LENGTH_SHORT).show()
             }

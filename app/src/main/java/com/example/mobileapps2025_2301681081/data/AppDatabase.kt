@@ -1,9 +1,9 @@
 package com.example.mobileapps2025_2301681081.data
 
 import android.content.Context
-import androidx.room3.Database
-import androidx.room3.RoomDatabase
-import androidx.room3.Room
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import androidx.room.Room
 
 @Database(entities = [Note::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
