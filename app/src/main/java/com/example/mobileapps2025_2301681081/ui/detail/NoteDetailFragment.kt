@@ -15,6 +15,8 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mobileapps2025_2301681081.R
@@ -25,6 +27,7 @@ import com.example.mobileapps2025_2301681081.ui.NoteViewModel
 import com.example.mobileapps2025_2301681081.ui.NoteViewModelFactory
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import kotlinx.coroutines.launch
 
 class NoteDetailFragment : Fragment() {
 
@@ -130,11 +133,13 @@ class NoteDetailFragment : Fragment() {
     private fun showQrDialog(content: String) {
         try {
             val encoder = BarcodeEncoder()
+            val hints = mapOf(com.google.zxing.EncodeHintType.CHARACTER_SET to "UTF-8")
             val bitmap: Bitmap = encoder.encodeBitmap(
                 content,
                 BarcodeFormat.QR_CODE,
                 600,
                 600,
+                hints
             )
 
             val imageView = ImageView(requireContext()).apply {
@@ -168,11 +173,15 @@ class NoteDetailFragment : Fragment() {
     }
 
     private fun observeSaveResult() {
-        viewModel.saveResult.observe(viewLifecycleOwner) { success ->
-            if (success) {
-                findNavController().popBackStack()
-            } else {
-                binding.editTitle.error = getString(R.string.title_required)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.saveResult.collect { success ->
+                    if (success == true) {
+                        findNavController().popBackStack()
+                    } else {
+                        binding.editTitle.error = getString(R.string.title_required)
+                    }
+                }
             }
         }
     }
