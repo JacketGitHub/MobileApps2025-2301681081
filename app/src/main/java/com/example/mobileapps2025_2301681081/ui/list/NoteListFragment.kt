@@ -21,6 +21,7 @@ import com.example.mobileapps2025_2301681081.ui.NoteViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 class NoteListFragment : Fragment() {
     private var _binding: FragmentNoteListBinding? = null
@@ -61,12 +62,84 @@ class NoteListFragment : Fragment() {
             this.adapter = this@NoteListFragment.adapter
         }
 
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                r: RecyclerView,
+                v: RecyclerView.ViewHolder,
+                t: RecyclerView.ViewHolder
+            ) = false
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val note = adapter.currentList[viewHolder.adapterPosition]
                 viewModel.deleteNote(note)
                 Snackbar.make(binding.root, "Note deleted", Snackbar.LENGTH_SHORT).show()
+            }
+
+            override fun onChildDraw(
+                c: android.graphics.Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                val itemView = viewHolder.itemView
+                val paint = android.graphics.Paint()
+
+                // Red background
+                paint.color = "#F44336".toColorInt()
+
+                // Draw red rectangle behind the card
+                if (dX > 0) {
+                    // swiping right
+                    c.drawRect(
+                        itemView.left.toFloat(),
+                        itemView.top.toFloat(),
+                        itemView.left + dX,
+                        itemView.bottom.toFloat(),
+                        paint
+                    )
+                } else {
+                    // swiping left
+                    c.drawRect(
+                        itemView.right + dX,
+                        itemView.top.toFloat(),
+                        itemView.right.toFloat(),
+                        itemView.bottom.toFloat(),
+                        paint
+                    )
+                }
+
+                // Trash icon
+                val icon = androidx.core.content.ContextCompat.getDrawable(
+                    recyclerView.context,
+                    android.R.drawable.ic_menu_delete
+                )!!
+                icon.setTint(android.graphics.Color.WHITE)
+
+                val iconMargin = 48
+                val iconTop = itemView.top + (itemView.height - icon.intrinsicHeight) / 2
+                val iconBottom = iconTop + icon.intrinsicHeight
+
+                if (dX > 0) {
+                    // icon on the left side when swiping right
+                    val iconLeft = itemView.left + iconMargin
+                    val iconRight = iconLeft + icon.intrinsicWidth
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                } else {
+                    // icon on the right side when swiping left
+                    val iconRight = itemView.right - iconMargin
+                    val iconLeft = iconRight - icon.intrinsicWidth
+                    icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                }
+
+                icon.draw(c)
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
         }).attachToRecyclerView(binding.recyclerView)
     }

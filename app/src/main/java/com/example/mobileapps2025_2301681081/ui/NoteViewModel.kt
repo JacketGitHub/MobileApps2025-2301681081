@@ -6,16 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobileapps2025_2301681081.data.Note
 import com.example.mobileapps2025_2301681081.data.NoteRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
 
     val allNotes = repository.allNotes
 
-    private val _saveResult = MutableSharedFlow<Boolean?>()
-    val saveResult = _saveResult.asSharedFlow()
+    private val _saveResult = MutableStateFlow<Boolean?>(null)
+    val saveResult = _saveResult.asStateFlow()
 
     private val _currentNote = MutableLiveData<Note?>()
     val currentNote: LiveData<Note?> = _currentNote
@@ -35,25 +35,21 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         val trimmedBody = body.trim()
 
         if (trimmedTitle.isEmpty()) {
-            viewModelScope.launch {
-                _saveResult.emit(false)
-            }
+            _saveResult.value = false
             return
         }
+
         viewModelScope.launch {
             if (existingId != null && existingId != 0) {
-                    val updated = Note(id = existingId, title = trimmedTitle, body = trimmedBody)
-                    repository.update(updated)
-                } else {
+                val updated = Note(id = existingId, title = trimmedTitle, body = trimmedBody)
+                repository.update(updated)
+            } else {
                 val newNote = Note(title = trimmedTitle, body = trimmedBody)
                 repository.insert(newNote)
-                }
-            _saveResult.emit(true)
-
+            }
+            _saveResult.value = true
         }
     }
-
-
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             repository.delete(note)
