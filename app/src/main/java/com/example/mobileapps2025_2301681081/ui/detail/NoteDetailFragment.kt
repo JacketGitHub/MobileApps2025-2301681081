@@ -41,7 +41,6 @@ class NoteDetailFragment : Fragment() {
         NoteViewModelFactory(NoteRepository(dao))
     }
 
-    // Whether we are editing an existing note (true) or creating a new one (false)
     private val isEditMode get() = args.noteId != 0
 
     override fun onCreateView(
@@ -55,6 +54,11 @@ class NoteDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // IMPORTANT: Reset the save result state when entering the fragment
+        // to prevent immediate popBackStack if the previous save was successful.
+        viewModel.onSaveResultHandled()
+
         setupMenu()
         setupSaveButton()
         setupQrButton()
@@ -63,7 +67,10 @@ class NoteDetailFragment : Fragment() {
             viewModel.loadNote(args.noteId)
             observeCurrentNote()
         } else {
-            viewModel.clearCurrentNote()
+            viewModel.resetState()
+            // Clear inputs for new note
+            binding.editTitle.setText("")
+            binding.editBody.setText("")
         }
 
         observeSaveResult()
@@ -74,7 +81,6 @@ class NoteDetailFragment : Fragment() {
             object : MenuProvider {
                 override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                     menuInflater.inflate(R.menu.menu_detail, menu)
-                    // Only show delete option when editing an existing note
                     menu.findItem(R.id.action_delete)?.isVisible = isEditMode
                 }
 
@@ -176,10 +182,18 @@ class NoteDetailFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.saveResult.collect { success ->
-                    if (success == true) {
-                        findNavController().popBackStack()
-                    } else {
-                        binding.editTitle.error = getString(R.string.title_required)
+                    when (success) {
+                        true -> {
+                            // Reset state BEFORE navigating away
+                            viewModel.onSaveResultHandled()
+                            findNavController().popBackStack()
+                        }
+                        false -> {
+                            binding.editTitle.error = getString(R.string.title_required)
+                            // Reset state so the error doesn't persist if they leave and return
+                            viewModel.onSaveResultHandled()
+                        }
+                        null -> { /* Initial state, do nothing */ }
                     }
                 }
             }

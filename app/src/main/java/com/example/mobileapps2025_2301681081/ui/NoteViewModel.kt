@@ -26,8 +26,13 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun clearCurrentNote() {
+    /**
+     * Resets the state of the ViewModel. Call this when entering "Add Note" mode
+     * or after a navigation has been handled.
+     */
+    fun resetState() {
         _currentNote.value = null
+        _saveResult.value = null
     }
 
     fun saveNote(title: String, body: String, existingId: Int? = null) {
@@ -40,16 +45,25 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         }
 
         viewModelScope.launch {
-            if (existingId != null && existingId != 0) {
-                val updated = Note(id = existingId, title = trimmedTitle, body = trimmedBody)
-                repository.update(updated)
-            } else {
-                val newNote = Note(title = trimmedTitle, body = trimmedBody)
-                repository.insert(newNote)
+            try {
+                if (existingId != null && existingId != 0) {
+                    val updated = Note(id = existingId, title = trimmedTitle, body = trimmedBody)
+                    repository.update(updated)
+                } else {
+                    val newNote = Note(title = trimmedTitle, body = trimmedBody)
+                    repository.insert(newNote)
+                }
+                _saveResult.value = true
+            } catch (_: Exception) {
+                _saveResult.value = false
             }
-            _saveResult.value = true
         }
     }
+
+    fun onSaveResultHandled() {
+        _saveResult.value = null
+    }
+
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             repository.delete(note)
