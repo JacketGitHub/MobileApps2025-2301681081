@@ -90,12 +90,9 @@ class NoteListFragment : Fragment() {
                 val itemView = viewHolder.itemView
                 val paint = android.graphics.Paint()
 
-                // Red background
                 paint.color = "#F44336".toColorInt()
 
-                // Draw red rectangle behind the card
                 if (dX > 0) {
-                    // swiping right
                     c.drawRect(
                         itemView.left.toFloat(),
                         itemView.top.toFloat(),
@@ -104,7 +101,6 @@ class NoteListFragment : Fragment() {
                         paint
                     )
                 } else {
-                    // swiping left
                     c.drawRect(
                         itemView.right + dX,
                         itemView.top.toFloat(),
@@ -114,7 +110,6 @@ class NoteListFragment : Fragment() {
                     )
                 }
 
-                // Trash icon
                 val icon = androidx.core.content.ContextCompat.getDrawable(
                     recyclerView.context,
                     android.R.drawable.ic_menu_delete
@@ -126,12 +121,10 @@ class NoteListFragment : Fragment() {
                 val iconBottom = iconTop + icon.intrinsicHeight
 
                 if (dX > 0) {
-                    // icon on the left side when swiping right
                     val iconLeft = itemView.left + iconMargin
                     val iconRight = iconLeft + icon.intrinsicWidth
                     icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
                 } else {
-                    // icon on the right side when swiping left
                     val iconRight = itemView.right - iconMargin
                     val iconLeft = iconRight - icon.intrinsicWidth
                     icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)

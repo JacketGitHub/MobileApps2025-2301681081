@@ -54,9 +54,6 @@ class NoteDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // IMPORTANT: Reset the save result state when entering the fragment
-        // to prevent immediate popBackStack if the previous save was successful.
         viewModel.onSaveResultHandled()
 
         setupMenu()
@@ -68,7 +65,6 @@ class NoteDetailFragment : Fragment() {
             observeCurrentNote()
         } else {
             viewModel.resetState()
-            // Clear inputs for new note
             binding.editTitle.setText("")
             binding.editBody.setText("")
         }
@@ -184,16 +180,14 @@ class NoteDetailFragment : Fragment() {
                 viewModel.saveResult.collect { success ->
                     when (success) {
                         true -> {
-                            // Reset state BEFORE navigating away
                             viewModel.onSaveResultHandled()
                             findNavController().popBackStack()
                         }
                         false -> {
                             binding.editTitle.error = getString(R.string.title_required)
-                            // Reset state so the error doesn't persist if they leave and return
                             viewModel.onSaveResultHandled()
                         }
-                        null -> { /* Initial state, do nothing */ }
+                        null -> { }
                     }
                 }
             }

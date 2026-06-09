@@ -26,10 +26,6 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Resets the state of the ViewModel. Call this when entering "Add Note" mode
-     * or after a navigation has been handled.
-     */
     fun resetState() {
         _currentNote.value = null
         _saveResult.value = null

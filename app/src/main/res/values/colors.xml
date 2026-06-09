@@ -3,7 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Light theme colors -->
     <color name="md_theme_light_primary">#4A5BC4</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#DDE1FF</color>
@@ -22,7 +21,6 @@
     <color name="md_theme_light_error">#BA1A1A</color>
     <color name="md_theme_light_onError">#FFFFFF</color>
 
-    <!-- Dark theme colors -->
     <color name="md_theme_dark_primary">#B8C3FF</color>
     <color name="md_theme_dark_onPrimary">#0E1F8A</color>
     <color name="md_theme_dark_primaryContainer">#3042B0</color>
